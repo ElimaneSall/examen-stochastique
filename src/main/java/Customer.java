@@ -1,3 +1,5 @@
+import java.util.Arrays;
+
 public class Customer {
 
     // model deep learning:
@@ -19,6 +21,23 @@ public class Customer {
     private double waiting_time;
     private boolean is_served = true;
     private double service_time;
+
+    @Override
+    public String toString() {
+        return "Customer{" +
+                "type=" + type +
+                ", length_file=" + Arrays.toString(length_file) +
+                ", arrival_time=" + arrival_time +
+                ", nb_server=" + nb_server +
+                ", LES=" + LES +
+                ", Avg_LES=" + Avg_LES +
+                ", AvgC_LES=" + AvgC_LES +
+                ", WAvgC_LES=" + WAvgC_LES +
+                ", waiting_time=" + waiting_time +
+                ", is_served=" + is_served +
+                ", service_time=" + service_time +
+                '}';
+    }
 
     public int getType() {
         return type;
