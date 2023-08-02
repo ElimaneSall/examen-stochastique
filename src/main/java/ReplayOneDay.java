@@ -141,22 +141,21 @@ public class ReplayOneDay {
     public class Arrival extends Event {
         Customer cust;
 
-        public Arrival(Customer cust){
+        public Arrival(Customer cust) {
             this.cust = cust;
         }
 
         public void actions() {
 
-            // Initialiser le nombre de cust du meme type trouve dans la file
-           int nbrecustumerSameType =   array_queue_length[cust.getType()] ++;
+            // Initialize the number of customers of the same type found in the queue
+            int nbreCustomerSameType = array_queue_length[cust.getType()];
 
-            // Initialisation des predicteurs(LES, AvgLES, AvgCLES, WAvgCLES)
+            // Initialize the predictors (LES, AvgLES, AvgCLES, WAvgCLES)
             // LES
-            if (nbrecustumerSameType ==0){
+            if (nbreCustomerSameType == 0) {
                 cust.setLES(cust.getWaiting_time());
-            }
-            else {
-                cust.setLES(Double.parseDouble(String.valueOf(array_LES[cust.getType()])));
+            } else {
+                cust.setLES(array_LES[cust.getType()]);
             }
 
             // AvgLES
@@ -174,27 +173,25 @@ public class ReplayOneDay {
             avg_les /= list.size();
             cust.setAvg_LES(avg_les);
 
-//            cust.setAvgC_LES(3);
-//            cust.setWAvgC_LES(5);
-
-            // Initialiser nb_servers(le nombre de serveurs occupes)
+            // Initialize nb_servers (the number of busy servers)
             nb_servers++;
-            // Placer le cust dans la file
+
+            // Place the customer in the queue
             waitList.add(cust);
-            // scheduler son depart(abandon ou servis) de la file dans wainting_time;
-            if (cust.isIs_served()) {
-                new Departure(cust).schedule(cust.getWaiting_time() + cust.getService_time());
-
-            } else {
-                new Departure(cust).schedule(cust.getWaiting_time());
-
-            }
-            // Incrementer le nombre de cust de ce type   (array_queue_length)
+            // Incrémentez le nombre de clients de ce type (array_queue_length)
             array_queue_length[cust.getType()]++;
 
+            // Schedule the customer's departure (abandon or served) from the queue in waiting_time;
+            if (cust.isIs_served()) {
+                new Departure(cust).schedule(cust.getWaiting_time() + cust.getService_time());
+            } else {
+                new Departure(cust).schedule(cust.getWaiting_time());
+            }
+
+            // Increment the number of customers of this type (array_queue_length)
+//            array_queue_length[cust.getType()]++;
         }
     }
-
     public class Departure extends Event {
         Customer cust;
 
@@ -203,36 +200,42 @@ public class ReplayOneDay {
         }
 
         public void actions() {
-            // Mettre a jours les donnees utilisees par les predicteurs
+            // Update the data used by the predictors
 
             // array_LES
             array_LES[cust.getType()] = cust.getWaiting_time();
-            // update array_avg_LES
+
+            // Update array_avg_LES
             array_Avg_LES[cust.getType()].add(cust.getWaiting_time());
 
-            // Decrementer le nb cust de ce type()  (array_queue_length)
+            // Decrement the number of customers of this type (array_queue_length)
             array_queue_length[cust.getType()]--;
 
-            // Si depart == abandon alors mettre cust dans la liste des cust abandonnes  (abandon_customer)
+            // If the departure is an abandonment, put the customer in the list of abandoned customers (abandon_customer)
             if (!cust.isIs_served()) {
                 abandon_customer.add(cust);
             } else {
                 served_customer.add(cust);
             }
 
-            // Si depart == debutService alors incrementer nb_servers
+            // If the departure is the start of service, increment nb_servers
             if (cust.isIs_served()) {
                 nb_servers--;
             }
 
-            // scheduler la fin de service du prochain customer
+            // Schedule the end of service of the next customer
             if (!waitList.isEmpty()) {
                 Customer next_cust = waitList.poll();
                 new Departure(next_cust).schedule(next_cust.getWaiting_time() + next_cust.getService_time());
+
+                // Update the LES of the next customer
+                if (array_queue_length[next_cust.getType()] == 0) {
+                    next_cust.setLES(next_cust.getWaiting_time());
+                } else {
+                    next_cust.setLES(array_LES[next_cust.getType()]);
+                }
             }
-
         }
-
     }
 
 

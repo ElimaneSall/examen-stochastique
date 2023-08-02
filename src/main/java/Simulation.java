@@ -1,7 +1,9 @@
 import umontreal.ssj.simevents.Event;
 import umontreal.ssj.simevents.Sim;
 
+import java.io.FileWriter;
 import java.io.IOException;
+import java.util.List;
 
 public class Simulation {
     private double simulationDuration;
@@ -34,13 +36,45 @@ public class Simulation {
             Sim.start();
             System.out.println("Simulation completed.");
             for (Customer customer : replay.served_customer) {
-                System.out.println("Customer LES: " + customer.toString());
+                System.out.println("Customer: " + customer.toString());
             }
+            // Save customers to CSV file
+            saveCustomersToCSV(replay.served_customer, "customers.csv");
             // Add any required post-simulation analysis or results processing here.
             // You can access the data collected in ReplayOneDay, like served_customer, abandon_customer, etc.
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+    private void saveCustomersToCSV(List<Customer> customers, String fileName) throws IOException {
+        FileWriter writer = new FileWriter(fileName);
+
+        // Write the header row
+        writer.write("Type,Arrival_Time,Num_Servers,LES,Avg_LES,AvgC_LES,WAvgC_LES,Waiting_Time,Is_Served,Service_Time\n");
+//        writer.write("Type,Length_File_0,Length_File_1,...,Arrival_Time,Num_Servers,LES,Avg_LES,AvgC_LES,WAvgC_LES,Waiting_Time,Is_Served,Service_Time\n");
+
+        // Write each customer's data
+        for (Customer customer : customers) {
+            StringBuilder sb = new StringBuilder();
+
+            // Append all fields separated by commas
+            sb.append(customer.getType()).append(",");
+//            for (int i = 0; i < customer.getLength_file().length; i++) {
+//                sb.append(customer.getLength_file()[i]).append(",");
+//            }
+            sb.append(customer.getArrival_time()).append(",");
+            sb.append(customer.getNb_server()).append(",");
+            sb.append(customer.getLES()).append(",");
+            sb.append(customer.getAvg_LES()).append(",");
+            sb.append(customer.getAvgC_LES()).append(",");
+            sb.append(customer.getWAvgC_LES()).append(",");
+            sb.append(customer.getWaiting_time()).append(",");
+            sb.append(customer.isIs_served()).append(",");
+            sb.append(customer.getService_time()).append("\n");
+
+            writer.write(sb.toString());
+        }
+        writer.close();
     }
 
     public static void main(String[] args) {
