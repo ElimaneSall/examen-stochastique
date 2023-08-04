@@ -4,7 +4,6 @@ import umontreal.ssj.simevents.Event;
 import umontreal.ssj.simevents.Sim;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -12,7 +11,6 @@ import java.util.LinkedList;
 
 public class ReplayOneDay {
     LinkedList<Customer> waitList = new LinkedList<Customer> ();
-
     //Contains the length of queues
     private int[] array_queue_length =  new int[27];
     private double[] array_LES = new double[27];
@@ -24,7 +22,7 @@ public class ReplayOneDay {
     private ArrayList<Customer> abandon_customer = new ArrayList<>();
 
     public ReplayOneDay() {
-        nb_servers =0;
+        nb_servers= 137;
         for (int i=0; i<27; i++){
             array_LES[i]=0;
             array_queue_length[i]=0;
@@ -40,14 +38,20 @@ public class ReplayOneDay {
         BufferedReader br = new BufferedReader(new FileReader(file));
         br.readLine();
         String read_line = br.readLine();
-        while (read_line != null){
+        int i =0;
+        int n = 126070;
+        while (read_line != null && i<10){
+            i++;
             Customer cust = new Customer();
             String[] elements =  read_line.split(",");
+
+//            System.out.println("Je ne suis pas null("+i+")");
 //            System.out.println("Type"+elements[1]);
             cust.setArrival_time(getTime(elements[0]));
             cust.setType(Integer.parseInt(String.valueOf(mapQueueName(Integer.parseInt(elements[1])))));
 //            System.out.println("Ans"+elements[3]);
 //            System.out.println("Hang"+elements[6]);
+            cust.setId(i);
             cust.setWaiting_time(getWaitingTime(elements[0], elements[3], elements[6]));
             if (elements[3].equals("NULL") ) {
                 cust.setIs_served(false);
@@ -106,19 +110,19 @@ public class ReplayOneDay {
             case 30180:
                 return 11;
             case
-                30174:
+                    30174:
                 return 12;
             case
-                30325:
+                    30325:
                 return 13;
             case
-                30236:
+                    30236:
                 return 14;
             case
-                30363:
+                    30363:
                 return 15;
             case
-                30334:
+                    30334:
                 return 16;
             default:
 
@@ -146,50 +150,75 @@ public class ReplayOneDay {
         }
 
         public void actions() {
+            // Initialiser le nombre de cust du meme type trouve dans la file
 
-            // Initialize the number of customers of the same type found in the queue
-            int nbreCustomerSameType = array_queue_length[cust.getType()];
+            int nbreCustSameType= array_queue_length[cust.getType()];
 
-            // Initialize the predictors (LES, AvgLES, AvgCLES, WAvgCLES)
+            //      Initialisation des predicteurs(LES, AvgLES, AvgCLES, WAvgCLES)
             // LES
-            if (nbreCustomerSameType == 0) {
-                cust.setLES(cust.getWaiting_time());
-            } else {
-                cust.setLES(array_LES[cust.getType()]);
+
+            double LES =0;
+            if(nbreCustSameType==0){
+               LES=  cust.getWaiting_time();
+
+            }
+            else {
+                for (int i = served_customer.size() - 1; i >= 0; i--) {
+                    Customer customer = served_customer.get(i);
+                    if (customer.getType() == cust.getType()) {
+                        LES = customer.getWaiting_time();
+                        break; // Stop loop as we found the last customer of the same type
+                    }
+                }
+            }
+            array_LES[cust.getType()]= LES;
+            cust.setLES(array_LES[cust.getType()]);
+
+            // AVG_LES
+            if(nbreCustSameType==0){
+                 cust.setAvg_LES(cust.getWaiting_time());
+
             }
 
-            // AvgLES
-            LinkedList<Double> list = array_Avg_LES[cust.getType()];
-            if (list.size() < 10) {
-                list.add(cust.getWaiting_time());
-            } else {
-                list.remove(0);
-                list.add(cust.getWaiting_time());
-            }
-            double avg_les = 0;
-            for (Double waiting_time : list) {
-                avg_les += waiting_time;
-            }
-            avg_les /= list.size();
-            cust.setAvg_LES(avg_les);
+//            else {
+//                LinkedList<Double> AvgLES = new LinkedList<Double>();
+//                int j = 0;
+//                for (int i = served_customer.size() - 1; i >= 0; i--) {
+//                    Customer customer = served_customer.get(i);
+//                    if (customer.getType() == cust.getType() && j <= 5) {
+//                        Double avgLES = Double.valueOf(customer.getWaiting_time());
+//                        AvgLES.add(avgLES);
+//                        j++;
+//                    }
+//                }
+//                array_Avg_LES[cust.getType()] = AvgLES;
+//                double sum = 0;
+//                for (Object i :
+//                        array_Avg_LES[cust.getType()]) {
+//                    sum = sum + Double.parseDouble(i.toString());
+//                }
+////            int moy = array_Avg_LES;
+//                cust.setAvg_LES(sum / array_Avg_LES[cust.getType()].size());
+//            }
+            // Initialiser nb_servers(le nombre de serveurs occupes)
+            // AVGC_LES
+            cust.setLength_file(array_queue_length.clone());
+            System.out.println("Arrival ("+cust.getType()+")>> "+cust.getLength_file()[cust.getType()]);
 
-            // Initialize nb_servers (the number of busy servers)
-            nb_servers++;
 
-            // Place the customer in the queue
+            nb_servers--;
+            // Placer le cust dans la file
             waitList.add(cust);
-            // Incrémentez le nombre de clients de ce type (array_queue_length)
-            array_queue_length[cust.getType()]++;
-
-            // Schedule the customer's departure (abandon or served) from the queue in waiting_time;
+            //            scheduler son depart(abandon ou servis) de la file dans wainting_time;
             if (cust.isIs_served()) {
                 new Departure(cust).schedule(cust.getWaiting_time() + cust.getService_time());
+                served_customer.add(cust);
             } else {
                 new Departure(cust).schedule(cust.getWaiting_time());
+                abandon_customer.add(cust);
             }
-
-            // Increment the number of customers of this type (array_queue_length)
-//            array_queue_length[cust.getType()]++;
+            //            Incrementer le nombre de cust de ce type   (array_queue_length)
+            array_queue_length[cust.getType()]++;
         }
     }
     public class Departure extends Event {
@@ -200,57 +229,38 @@ public class ReplayOneDay {
         }
 
         public void actions() {
-            // Update the data used by the predictors
+            // Decrementer le nb cust de ce type()  (array_queue_length)
 
-            // array_LES
-            array_LES[cust.getType()] = cust.getWaiting_time();
+//            array_queue_length[cust.getType()]--;
+//            cust.setLength_file(array_queue_length);
+//            System.out.println("Depart ("+cust.getType()+")>> "+cust.getLength_file()[cust.getType()]);
+            if (Sim.time()+cust.getWaiting_time()==cust.getWaiting_time()){
+                array_queue_length[cust.getType()]--;
 
-            // Update array_avg_LES
-            array_Avg_LES[cust.getType()].add(cust.getWaiting_time());
-
-            // Decrement the number of customers of this type (array_queue_length)
-            array_queue_length[cust.getType()]--;
-
-            // If the departure is an abandonment, put the customer in the list of abandoned customers (abandon_customer)
-            if (!cust.isIs_served()) {
-                abandon_customer.add(cust);
-            } else {
-                served_customer.add(cust);
             }
-
-            // If the departure is the start of service, increment nb_servers
-            if (cust.isIs_served()) {
-                nb_servers--;
+            if(cust.isIs_served() ){
+                nb_servers++;
             }
+            // schudeler la fin de service
+            if (waitList.size()>0) {
+                Customer next_cust = waitList.removeFirst();
+//                System.out.println("WaitList ("+waitList.size()+ ")>>"+waitList+"\nservers>> "+nb_servers);
 
-            // Schedule the end of service of the next customer
-            if (!waitList.isEmpty()) {
-                Customer next_cust = waitList.poll();
-                new Departure(next_cust).schedule(next_cust.getWaiting_time() + next_cust.getService_time());
+                if (next_cust.isIs_served()) {
+                    nb_servers--;
 
-                // Update the LES of the next customer
-                if (array_queue_length[next_cust.getType()] == 0) {
-                    next_cust.setLES(next_cust.getWaiting_time());
+                    array_queue_length[next_cust.getType()]--;
+                    new Departure(next_cust).schedule(next_cust.getWaiting_time() + next_cust.getService_time());
                 } else {
-                    next_cust.setLES(array_LES[next_cust.getType()]);
+                    array_queue_length[next_cust.getType()]--;
+                    new Departure(next_cust).schedule(next_cust.getWaiting_time());
+//                    abandon_customer.add(next_cust);
                 }
+
+            }
+
+        }
             }
         }
-    }
 
 
-    public class EndSimulation extends Event {
-        private double duration;
-
-        public EndSimulation(double duration) {
-            this.duration = duration;
-        }
-
-        public void actions() {
-            Sim.stop();
-        }
-    }
-
-
-
-}

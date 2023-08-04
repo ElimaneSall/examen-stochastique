@@ -32,14 +32,15 @@ public class Simulation {
             ReplayOneDay replay = new ReplayOneDay();
             replay.createCustomerOfTheDay(inputFile);
             System.out.println("Starting simulation...");
-            new EndSimulation(simulationDuration).schedule(simulationDuration);
+//            new EndSimulation(simulationDuration).schedule(simulationDuration);
             Sim.start();
             System.out.println("Simulation completed.");
             for (Customer customer : replay.served_customer) {
                 System.out.println("Customer: " + customer.toString());
             }
+            System.out.println(replay.served_customer.size());
             // Save customers to CSV file
-            saveCustomersToCSV(replay.served_customer, "customers.csv");
+//            saveCustomersToCSV(replay.served_customer, "customers.csv");
             // Add any required post-simulation analysis or results processing here.
             // You can access the data collected in ReplayOneDay, like served_customer, abandon_customer, etc.
         } catch (IOException e) {
@@ -50,7 +51,7 @@ public class Simulation {
         FileWriter writer = new FileWriter(fileName);
 
         // Write the header row
-        writer.write("Type,Arrival_Time,Num_Servers,LES,Avg_LES,AvgC_LES,WAvgC_LES,Waiting_Time,Is_Served,Service_Time\n");
+        writer.write("Type,Arrival_Time,LES,Avg_LES,AvgC_LES,WAvgC_LES,Waiting_Time,Is_Served,Service_Time\n");
 //        writer.write("Type,Length_File_0,Length_File_1,...,Arrival_Time,Num_Servers,LES,Avg_LES,AvgC_LES,WAvgC_LES,Waiting_Time,Is_Served,Service_Time\n");
 
         // Write each customer's data
@@ -63,7 +64,7 @@ public class Simulation {
 //                sb.append(customer.getLength_file()[i]).append(",");
 //            }
             sb.append(customer.getArrival_time()).append(",");
-            sb.append(customer.getNb_server()).append(",");
+//            sb.append(customer.getNb_server()).append(",");
             sb.append(customer.getLES()).append(",");
             sb.append(customer.getAvg_LES()).append(",");
             sb.append(customer.getAvgC_LES()).append(",");

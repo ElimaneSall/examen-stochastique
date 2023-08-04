@@ -5,13 +5,14 @@ public class Customer {
     // model deep learning:
     //    type of service
     private int type;
+    private  int id;
     //    contains the length of the files
     private int[] length_file = new int[27];
 
     //    arrival time of the customer
     private double arrival_time;
     //    number of servers
-    private int nb_server;
+//    private int nb_server;
     //    the Last to Enter Service
     private double LES;
     private double Avg_LES;
@@ -25,10 +26,11 @@ public class Customer {
     @Override
     public String toString() {
         return "Customer{" +
-                "type=" + type +
+                "id="+id+
+                ", type=" + type +
                 ", length_file=" + Arrays.toString(length_file) +
                 ", arrival_time=" + arrival_time +
-                ", nb_server=" + nb_server +
+//                ", nb_server=" + nb_server +
                 ", LES=" + LES +
                 ", Avg_LES=" + Avg_LES +
                 ", AvgC_LES=" + AvgC_LES +
@@ -47,6 +49,14 @@ public class Customer {
         this.type = type;
     }
 
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
     public int[] getLength_file() {
         return length_file;
     }
@@ -63,13 +73,13 @@ public class Customer {
         this.arrival_time = arrival_time;
     }
 
-    public int getNb_server() {
-        return nb_server;
-    }
-
-    public void setNb_server(int nb_server) {
-        this.nb_server = nb_server;
-    }
+//    public int getNb_server() {
+//        return nb_server;
+//    }
+//
+//    public void setNb_server(int nb_server) {
+//        this.nb_server = nb_server;
+//    }
 
     public double getLES() {
         return LES;
