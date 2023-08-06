@@ -29,6 +29,7 @@ public class ReplayOneDay {
             array_Avg_LES[i] = new LinkedList<Double>();
             for (int j=0; j<50; j++){
                 array_AvgC_LES[i][j] = new LinkedList<Double>();
+                array_AvgC_LES[i][j].add(0.0);
             }
         }
     }
@@ -40,17 +41,14 @@ public class ReplayOneDay {
         String read_line = br.readLine();
         int i =0;
         int n = 126070;
-        while (read_line != null && i<10){
+        while (read_line != null && i<n){
             i++;
             Customer cust = new Customer();
             String[] elements =  read_line.split(",");
 
-//            System.out.println("Je ne suis pas null("+i+")");
-//            System.out.println("Type"+elements[1]);
             cust.setArrival_time(getTime(elements[0]));
             cust.setType(Integer.parseInt(String.valueOf(mapQueueName(Integer.parseInt(elements[1])))));
-//            System.out.println("Ans"+elements[3]);
-//            System.out.println("Hang"+elements[6]);
+
             cust.setId(i);
             cust.setWaiting_time(getWaitingTime(elements[0], elements[3], elements[6]));
             if (elements[3].equals("NULL") ) {
@@ -203,7 +201,53 @@ public class ReplayOneDay {
             // Initialiser nb_servers(le nombre de serveurs occupes)
             // AVGC_LES
             cust.setLength_file(array_queue_length.clone());
-            System.out.println("Arrival ("+cust.getType()+")>> "+cust.getLength_file()[cust.getType()]);
+            double meanSameType =0;
+            LinkedList<Double> AvgCLES = new LinkedList<Double>();
+            int length= array_queue_length[cust.getType()];
+            if(nbreCustSameType==0){
+                meanSameType=  cust.getWaiting_time();
+            }
+            else {
+                int j = 0;
+                for (int i = served_customer.size() -1; i >=0; i--) {
+                    Customer customer = served_customer.get(i);
+                    if (customer.getType() == cust.getType()
+                           && cust.getLength_file()[cust.getType()]== customer.getLength_file()[customer.getType()]
+                            && cust.getId() != customer.getId()
+                    ) {
+                        meanSameType = Double.valueOf(customer.getWaiting_time());
+//                        length = cust.getLength_same_type(cust.getType());
+                        j++;
+                        AvgCLES.add(meanSameType);
+//                        System.out.println(cust.getId() != customer.getId());
+
+                    }
+                }
+                array_AvgC_LES[cust.getType()][0].add(meanSameType);
+                array_AvgC_LES[cust.getType()][1].add(j);
+
+                double sum = 0;
+                for (Object i :
+                        array_AvgC_LES[cust.getType()][0]) {
+                    sum = sum + Double.parseDouble(i.toString());
+                }
+
+                double sum2=0;
+                for (Object i :
+                        array_AvgC_LES[cust.getType()][1]) {
+                    sum2 = sum2 + Double.parseDouble(i.toString());
+                }
+                sum2 = Double.parseDouble(array_AvgC_LES[cust.getType()][1].getLast().toString());
+//            int moy = array_Avg_LES;
+
+                cust.setAvgC_LES(sum / sum2);
+//                System.out.println("AVGC_LES("+cust.getId() +")>>"+cust.getAvgC_LES());
+//                System.out.println("------------------Array-LES");
+//                System.out.println("Sum>>"+sum+"deno>>"+sum2);
+
+//                System.out.println(array_Avg_LES[cust.getType()].toString());
+            }
+//            System.out.println("Arrival ("+cust.getId()+")>> "+cust.getLength_file()[cust.getType()]);
 
 
             nb_servers--;

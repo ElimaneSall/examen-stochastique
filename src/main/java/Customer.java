@@ -60,6 +60,9 @@ public class Customer {
     public int[] getLength_file() {
         return length_file;
     }
+    public int getLength_same_type(int type){
+        return length_file[type] ;
+    }
 
     public void setLength_file(int[] length_file) {
         this.length_file = length_file;
