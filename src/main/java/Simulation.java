@@ -40,7 +40,7 @@ public class Simulation {
             }
             System.out.println(replay.served_customer.size());
             // Save customers to CSV file
-//            saveCustomersToCSV(replay.served_customer, "customers.csv");
+            saveCustomersToCSV(replay.served_customer, "customers.csv");
             // Add any required post-simulation analysis or results processing here.
             // You can access the data collected in ReplayOneDay, like served_customer, abandon_customer, etc.
         } catch (IOException e) {

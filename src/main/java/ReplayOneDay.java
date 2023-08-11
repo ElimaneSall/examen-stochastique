@@ -177,30 +177,29 @@ public class ReplayOneDay {
                  cust.setAvg_LES(cust.getWaiting_time());
 
             }
-
-//            else {
-//                LinkedList<Double> AvgLES = new LinkedList<Double>();
-//                int j = 0;
-//                for (int i = served_customer.size() - 1; i >= 0; i--) {
-//                    Customer customer = served_customer.get(i);
-//                    if (customer.getType() == cust.getType() && j <= 5) {
-//                        Double avgLES = Double.valueOf(customer.getWaiting_time());
-//                        AvgLES.add(avgLES);
-//                        j++;
-//                    }
-//                }
-//                array_Avg_LES[cust.getType()] = AvgLES;
-//                double sum = 0;
-//                for (Object i :
-//                        array_Avg_LES[cust.getType()]) {
-//                    sum = sum + Double.parseDouble(i.toString());
-//                }
-////            int moy = array_Avg_LES;
-//                cust.setAvg_LES(sum / array_Avg_LES[cust.getType()].size());
-//            }
+            else {
+                LinkedList<Double> AvgLES = new LinkedList<Double>();
+                int j = 0;
+                for (int i = served_customer.size() - 1; i >= 0; i--) {
+                    Customer customer = served_customer.get(i);
+                    if (customer.getType() == cust.getType() && j <= 5) {
+                        Double avgLES = Double.valueOf(customer.getWaiting_time());
+                        AvgLES.add(avgLES);
+                        j++;
+                    }
+                }
+                array_Avg_LES[cust.getType()] = AvgLES;
+                double sum = 0;
+                for (Object i :
+                        array_Avg_LES[cust.getType()]) {
+                    sum = sum + Double.parseDouble(i.toString());
+                }
+//            int moy = array_Avg_LES;
+                cust.setAvg_LES(sum / array_Avg_LES[cust.getType()].size());
+            }
             // Initialiser nb_servers(le nombre de serveurs occupes)
-            // AVGC_LES
             cust.setLength_file(array_queue_length.clone());
+            //AVGC_LES
             double meanSameType =0;
             LinkedList<Double> AvgCLES = new LinkedList<Double>();
             int length= array_queue_length[cust.getType()];
@@ -247,9 +246,18 @@ public class ReplayOneDay {
 
 //                System.out.println(array_Avg_LES[cust.getType()].toString());
             }
-//            System.out.println("Arrival ("+cust.getId()+")>> "+cust.getLength_file()[cust.getType()]);
 
-
+            // WAVGC_LES
+            double sk = 0;
+            double alpha = 0.2;
+            if(array_WAvgC_LES[cust.getType()][0]==0){
+                sk = -1;
+            }else{
+                sk = alpha * cust.getWaiting_time() + (1-alpha)*array_WAvgC_LES[cust.getType()][0];
+            }
+            array_WAvgC_LES[cust.getType()][0] = sk;
+            array_WAvgC_LES[cust.getType()][1]++;
+            cust.setWAvgC_LES(sk);
             nb_servers--;
             // Placer le cust dans la file
             waitList.add(cust);
