@@ -16,11 +16,9 @@ public class Simulation {
 
     public class EndSimulation extends Event {
         private double duration;
-
         public EndSimulation(double duration) {
             this.duration = duration;
         }
-
         public void actions() {
             System.out.println("Simulation ended at time: " + Sim.time());
             Sim.stop();
@@ -35,14 +33,13 @@ public class Simulation {
 //            new EndSimulation(simulationDuration).schedule(simulationDuration);
             Sim.start();
             System.out.println("Simulation completed.");
-            for (Customer customer : replay.served_customer) {
-                System.out.println("Customer: " + customer.toString());
-            }
-            System.out.println(replay.served_customer.size());
+//            for (Customer customer : replay.served_customer) {
+//                System.out.println("Customer: " + customer.toString());
+//            }
+//            System.out.println(replay.served_customer.size());
             // Save customers to CSV file
-            saveCustomersToCSV(replay.served_customer, "customers.csv");
-            // Add any required post-simulation analysis or results processing here.
-            // You can access the data collected in ReplayOneDay, like served_customer, abandon_customer, etc.
+            saveCustomersToCSV(replay.served_customer, "customers2.csv");
+
         } catch (IOException e) {
             e.printStackTrace();
         }
